@@ -3,16 +3,17 @@ package com.simplesdental.desafio.profissionais.api.service;
 import com.simplesdental.desafio.profissionais.api.model.Profissional;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ProfissionalService {
 
-    List<Profissional> buscarProfissionais(String filtro);
+    List<Profissional> listarProfissionais(String filtro, List<String> fields);
 
-    Profissional buscarPorId(Long id);
+    Optional<Profissional> buscarPorId(Long id);
 
     Profissional salvar(Profissional profissional);
 
-    String atualizar(Profissional profissional);
+    Profissional atualizar(Profissional profissional);
 
-    String excluir(Long id);
+    void excluir(Long id);
 }

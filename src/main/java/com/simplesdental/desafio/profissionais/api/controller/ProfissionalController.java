@@ -6,12 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/profissionais")
@@ -25,9 +25,10 @@ public class ProfissionalController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Profissional>> buscarProfissionais(@RequestParam(required = false) String filtro) {
+    public ResponseEntity<List<Profissional>> buscarProfissionais(@RequestParam(required = false) String filtro,
+                                                                  @RequestParam(required = false) List<String> fields) {
         try {
-            List<Profissional> profissionais = profissionalService.buscarProfissionais(filtro);
+            List<Profissional> profissionais = profissionalService.listarProfissionais(filtro, fields);
 
             if (Objects.nonNull(profissionais)) {
                 return ResponseEntity.status(HttpStatus.OK).body(profissionais);
@@ -41,8 +42,8 @@ public class ProfissionalController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Profissional> buscarPorId(@PathVariable Long id) {
-        Profissional profissional = profissionalService.buscarPorId(id);
+    public ResponseEntity<Optional<Profissional>> buscarPorId(@PathVariable Long id) {
+        Optional<Profissional> profissional = profissionalService.buscarPorId(id);
         if (Objects.nonNull(profissional)) {
             return ResponseEntity.status(HttpStatus.OK).body(profissional);
         }
@@ -57,23 +58,25 @@ public class ProfissionalController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> atualizar(@PathVariable Long id, @RequestBody Profissional profissional) {
-        Profissional profissionalDb = profissionalService.buscarPorId(id);
+    public ResponseEntity<Profissional> atualizar(@PathVariable Long id, @RequestBody Profissional profissional) {
+        Optional<Profissional> profissionalDb = profissionalService.buscarPorId(id);
 
         if (Objects.nonNull(profissionalDb)){
-            profissionalService.atualizar(profissional);
-            return ResponseEntity.status(HttpStatus.OK).body("Sucesso profissional alterado com sucesso");
+            Profissional profissionalAtualizado = profissionalService.atualizar(profissional);
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(profissionalAtualizado);
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> excluir(@PathVariable Long id) {
-        Profissional profissionalDb = profissionalService.buscarPorId(id);
+        Optional<Profissional> profissionalDb = profissionalService.buscarPorId(id);
 
         if (Objects.nonNull(profissionalDb)){
             profissionalService.excluir(id);
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body("Sucesso profissional excluído com sucesso");
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body("Sucesso profissional excluído");
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
